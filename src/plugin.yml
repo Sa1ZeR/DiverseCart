@@ -1,0 +1,32 @@
+name: DiverseCart
+main: me.Sa1ZeR_.DiverseCart.DiverseCart
+author: [Sa1ZeR_]
+version: 1.1
+commands:
+  diversecart:
+    aliases: [cart]
+permissions:
+  diversecart.kit.player:
+    description: Базовый набор прав для обычного игрока
+    children:
+      diversecart.cmd.help: true
+      diversecart.cmd.list: true
+      diversecart.cmd.get: true
+      diversecart.cmd.all: true
+  diversecart.kit.admin:
+      description: Базовый набор прав для администратора
+      children:
+        diversecart.admin.put: true
+        diversecart.admin.reload: true
+  diversecart.cmd.help:
+    description:
+  diversecart.cmd.list:
+    description:
+  diversecart.cmd.get:
+    description:
+  diversecart.cmd.all:
+    description:
+  diversecart.admin.put:
+    description:
+  diversecart.admin.reload:
+    description:
