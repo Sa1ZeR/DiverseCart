@@ -6,6 +6,8 @@ import me.Sa1ZeR_.DiverseCart.Utils.MySQL;
 import me.Sa1ZeR_.DiverseCart.commands.CommandManager;
 import me.Sa1ZeR_.DiverseCart.manager.CartManager;
 import me.Sa1ZeR_.DiverseCart.manager.MessageManager;
+import me.Sa1ZeR_.DiverseCart.manager.NBTManager.NBTManager;
+import me.Sa1ZeR_.DiverseCart.manager.NBTManager.NBTManager17;
 import me.Sa1ZeR_.DiverseCart.manager.StorageManager;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -22,6 +24,7 @@ public class DiverseCart extends JavaPlugin {
     private StorageManager storageManager;
     private CommandManager commandManager;
     private CartManager cartManager;
+    private NBTManager nbtManager;
 
     public void onEnable() {
         instance = this;
@@ -33,6 +36,7 @@ public class DiverseCart extends JavaPlugin {
         storageManager = new StorageManager();
         cartManager = new CartManager();
         commandManager = new CommandManager();
+        nbtManager = new NBTManager17();
         for(String cmd : getDescription().getCommands().keySet()) {
             getCommand(cmd).setExecutor(commandManager);
         }
@@ -64,5 +68,9 @@ public class DiverseCart extends JavaPlugin {
 
     public CartManager getCartManager() {
         return cartManager;
+    }
+
+    public NBTManager getNbtManager() {
+        return nbtManager;
     }
 }

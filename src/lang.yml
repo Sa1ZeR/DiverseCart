@@ -18,14 +18,20 @@ commands:
       '3': '&b>> &7/diversecart get <номер> - &5Получить предмет с определенным номером из корзины'
       '4': '&b>> &7/diversecart list - &5Просмотреть корзину'
       '5': '&b>> &7/diversecart reload - &5Добавить предмет в корзину'
+      '6': '&b>> &7/diversecart getnbt - &5Получить все NBTTags предмета'
   put:
     no-item-in-hand: '&4У Вас нет предмета в руке!'
     success: '&aВы успешно добавили предмет в базу!'
+  getnbt:
+    no-nbt: '&4NBTTags не найдены'
+    success: '&2NBTTags: &a%s%'
   list:
     header: '&8&m---------&r &8< &5DiverseCart &8> &m---------'
     info: '&2В Вашей корзине &a%s% &2предметов.'
     item: '&a%s%&7)&8 - &2Тип: &a%s%&2 Предмет: &a%s% &2x &a%s%'
     cart-empty: '&4Ваша корзина пуста.'
+  all:
+    cart-empty: '&4Ваша корзина пуста!'
   get:
     usage: '&b>> &7/diversecart get <номер> - &5Получить предмет с определенным номером из корзины'
     bad-format: '&4Неверный формат данных.'

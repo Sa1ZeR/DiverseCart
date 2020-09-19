@@ -10,5 +10,6 @@ public class CommandManager extends CommandHandler {
         registerCmd(new ListCommand(new String[] {"list"}, "diversecart.cmd.list", 0, "commands.list.usage"));
         registerCmd(new GetCommand(new String[] {"get"}, "diversecart.cmd.get", 1, "commands.get.usage"));
         registerCmd(new AllCommand(new String[] {"all"}, "diversecart.cmd.all", 0, "commands.all.usage"));
+        registerCmd(new GetNBTCommand(new String[] {"getnbt"}, "diversecart.cmd.getnbt", 0, "commands.getnbt.usage"));
     }
 }

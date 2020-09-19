@@ -13,5 +13,6 @@ cart-table:
   type: type
   amount: amount
   server-id: server_id
+server-id: 1
 
 split-symbol: '<:>'

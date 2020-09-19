@@ -61,28 +61,26 @@ public class StorageManager {
             public void run() {
                 PreparedStatement ps = null;
                 try {
-                    String ench = DiverseCart.instance.getCartManager().getEnchantments(itemStack);
-                    String extra = DiverseCart.instance.getCartManager().getExtra(itemStack);
-                    ps = connection.prepareStatement("INSERT INTO diverse_cart (server, type, username, iid, amount, enchantments, extra) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                    ps.setString(1, DiverseCart.instance.getCfg().getString("server-id"));
-                    ps.setString(2,"item");
-                    ps.setString(3, player);
-                    ps.setString(4, String.valueOf(itemStack.getType() + ":" +itemStack.getDurability()));
-                    ps.setInt(5, itemStack.getAmount());
-                    if(ench != null) {
-                        ps.setString(6, ench);
+                    String extrajson = DiverseCart.instance.getCartManager().getExtra(itemStack);
+                    ps = connection.prepareStatement("INSERT INTO " + tableName +" (" + username +", " + title + ", " + iid + ", " + extra + ", " + type + ", " + amount + ", " + serverId +") VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    ps.setString(1, player);
+                    ps.setString(2, itemStack.getType().name());
+                    ps.setString(3, String.valueOf(itemStack.getType() + ":" +itemStack.getDurability()));
+                    if(extrajson != null) {
+                        ps.setString(4, extrajson);
                     } else {
-                        ps.setString(6, null);
+                        ps.setString(4, null);
                     }
-                    if(extra != null) {
-                        ps.setString(7, extra);
-                    } else {
-                        ps.setString(7, null);
-                    }
+                    ps.setString(5, CartType.ITEM.getName());
+                    ps.setInt(6, itemStack.getAmount());
+                    ps.setInt(7, DiverseCart.instance.getCfg().getInt("server-id"));
                     ps.execute();
                     DiverseCart.instance.getDebug().info(player + " put itemstack: " + itemStack.toString());
                 } catch (SQLException e) {
                     DiverseCart.instance.getDebug().error("SQL error while putting item: \n" + e);
+                    for(StackTraceElement element : e.getStackTrace()) {
+                        DiverseCart.instance.getDebug().error(element.toString());
+                    }
                 } finally {
                     closeStatament(ps);
                 }
@@ -94,17 +92,20 @@ public class StorageManager {
         HashMap<Integer, String> map = new HashMap<>();
         PreparedStatement ps = null;
         try {
-            ps = connection.prepareStatement("SELECT * FROM diverse_cart WHERE username=? AND server=?");
+            ps = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE " + username +"=? AND " +serverId + "=?");
             ps.setString(1, player);
             ps.setString(2, DiverseCart.instance.getCfg().getString("server-id"));
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
-                String value = rs.getString("type") + ";" + rs.getString("iid") + ";" + rs.getInt("amount");
+                String value = rs.getString(type) + ";" + rs.getString(iid) + ";" + rs.getInt(amount);
                 map.put(id, value);
             }
         } catch (SQLException e) {
             DiverseCart.instance.getDebug().error("SQL error while player getting info about his cart: \n" + e);
+            for(StackTraceElement element : e.getStackTrace()) {
+                DiverseCart.instance.getDebug().error(element.toString());
+            }
         } finally {
             closeStatament(ps);
         }
@@ -117,32 +118,32 @@ public class StorageManager {
             public void run() {
                 PreparedStatement ps = null;
                 try {
-                    ps = connection.prepareStatement("SELECT * FROM diverse_cart WHERE id=? AND server=? AND username=?");
+                    ps = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE id=? AND " + serverId + "=? AND " + username + "=?");
                     ps.setInt(1, id);
-                    ps.setString(2, DiverseCart.instance.getCfg().getString("server-id"));
+                    ps.setInt(2, DiverseCart.instance.getCfg().getInt("server-id"));
                     ps.setString(3, player.getName());
                     ResultSet rs = ps.executeQuery();
-                    if(rs != null) {
-                        while (rs.next()) {
-                            CartType type = CartType.getType(rs.getString("type"));
-                            String iid = rs.getString("iid");
-                            int amount = rs.getInt("amount");
-                            String ench = null;
-                            if(rs.getString("enchantments") != null) {
-                                ench = rs.getString("enchantments");
-                            }
-                            String extra = null;
-                            if(rs.getString("extra") != null) {
-                                extra = rs.getString("extra");
-                            }
-                            DiverseCart.instance.getCartManager().performCartItem(type, iid, amount, ench, extra, player);
-                            clearItems(id);
+                    boolean given = false;
+                    while (rs.next()) {
+                        given = true;
+                        CartType cartType = CartType.getType(rs.getString(type));
+                        String itemId = rs.getString(iid);
+                        int itemAmount = rs.getInt(amount);
+                        String jsonextra = null;
+                        if(rs.getString(extra) != null) {
+                            jsonextra = rs.getString(extra);
                         }
-                    } else {
+                        DiverseCart.instance.getCartManager().performCartItem(cartType, itemId, itemAmount, jsonextra, player);
+                        clearItems(id);
+                    }
+                    if(!given) {
                         DiverseCart.instance.getMessageManager().sendPlayer("commands.get.cart-empty", player, new String[0]);
                     }
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     DiverseCart.instance.getDebug().error("SQL error while getting item: \n" + e);
+                    for(StackTraceElement element : e.getStackTrace()) {
+                        DiverseCart.instance.getDebug().error(element.toString());
+                    }
                 } finally {
                     closeStatament(ps);
                 }
@@ -156,31 +157,31 @@ public class StorageManager {
             public void run() {
                 PreparedStatement ps = null;
                 try {
-                    ps = connection.prepareStatement("SELECT * FROM diverse_cart WHERE server=? AND username=?");
-                    ps.setString(1,DiverseCart.instance.getCfg().getString("server-id"));
+                    ps = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE " + serverId + "=? AND " + username + "=?");
+                    ps.setInt(1,DiverseCart.instance.getCfg().getInt("server-id"));
                     ps.setString(2, player.getName());
                     ResultSet rs = ps.executeQuery();
-                    if(rs != null) {
-                        while (rs.next()) {
-                            CartType type = CartType.getType(rs.getString("type"));
-                            String iid = rs.getString("iid");
-                            int amount = rs.getInt("amount");
-                            String ench = null;
-                            if(rs.getString("enchantments") != null) {
-                                ench = rs.getString("enchantments");
-                            }
-                            String extra = null;
-                            if(rs.getString("extra") != null) {
-                                extra = rs.getString("extra");
-                            }
-                            DiverseCart.instance.getCartManager().performCartItem(type, iid, amount, ench, extra, player);
+                    boolean given = false;
+                    while (rs.next()) {
+                        given = true;
+                        CartType cartType = CartType.getType(rs.getString(type));
+                        String itemId = rs.getString(iid);
+                        int itemAmount = rs.getInt(amount);
+                        String jsonExtra = null;
+                        if(rs.getString(extra) != null) {
+                            jsonExtra = rs.getString(extra);
                         }
-                        clearItems(player);
-                    } else {
-                        DiverseCart.instance.getMessageManager().sendPlayer("commands.get.cart-empty", player, new String[0]);
+                        DiverseCart.instance.getCartManager().performCartItem(cartType, itemId, itemAmount, jsonExtra, player);
+                    }
+                    clearItems(player);
+                    if(!given) {
+                        DiverseCart.instance.getMessageManager().sendPlayer("commands.all.cart-empty", player);
                     }
                 } catch (SQLException e) {
                     DiverseCart.instance.getDebug().error("SQL error while getting all items: \n" + e);
+                    for(StackTraceElement element : e.getStackTrace()) {
+                        DiverseCart.instance.getDebug().error(element.toString());
+                    }
                 } finally {
                     closeStatament(ps);
                 }
@@ -194,12 +195,15 @@ public class StorageManager {
             public void run() {
                 PreparedStatement ps = null;
                 try {
-                    ps = connection.prepareStatement("DELETE FROM diverse_cart WHERE username=? AND server=?");
+                    ps = connection.prepareStatement("DELETE FROM " + tableName + " WHERE " + username + "=? AND " + serverId + "=?");
                     ps.setString(1, player.getName());
-                    ps.setString(2, DiverseCart.instance.getCfg().getString("server-id"));
+                    ps.setInt(2, DiverseCart.instance.getCfg().getInt("server-id"));
                     ps.execute();
                 } catch (SQLException e) {
                     DiverseCart.instance.getDebug().error("SQL error while remove items" + e);
+                    for(StackTraceElement element : e.getStackTrace()) {
+                        DiverseCart.instance.getDebug().error(element.toString());
+                    }
                     e.printStackTrace();
                 } finally {
                     closeStatament(ps);
@@ -214,12 +218,15 @@ public class StorageManager {
             public void run() {
                 PreparedStatement ps = null;
                 try {
-                    ps = connection.prepareStatement("DELETE FROM diverse_cart WHERE id=? AND server=?");
+                    ps = connection.prepareStatement("DELETE FROM " + tableName + " WHERE id=? AND " + serverId + "=?");
                     ps.setInt(1, id);
                     ps.setString(2, DiverseCart.instance.getCfg().getString("server-id"));
                     ps.execute();
                 } catch (SQLException e) {
                     DiverseCart.instance.getDebug().error("SQL error while remove items" + e);
+                    for(StackTraceElement element : e.getStackTrace()) {
+                        DiverseCart.instance.getDebug().error(element.toString());
+                    }
                     e.printStackTrace();
                 } finally {
                     closeStatament(ps);
@@ -237,6 +244,9 @@ public class StorageManager {
                         statement.close();
                     } catch (SQLException e) {
                         DiverseCart.instance.getDebug().error("Can't close statement: \n" + e);
+                        for(StackTraceElement element : e.getStackTrace()) {
+                            DiverseCart.instance.getDebug().error(element.toString());
+                        }
                     }
                 }
             }
