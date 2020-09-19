@@ -4,5 +4,14 @@ mysql:
   password: 123456
   database: root
 
-server-id: 1 #It's string. 16 symbols is max
+cart-table:
+  table-name: diverse_cart
+  username: username
+  title: title
+  iid: iid
+  extra: extra
+  type: type
+  amount: amount
+  server-id: server_id
+
 split-symbol: '<:>'

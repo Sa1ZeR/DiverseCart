@@ -2,6 +2,7 @@ package me.Sa1ZeR_.DiverseCart.manager;
 
 import me.Sa1ZeR_.DiverseCart.CartType;
 import me.Sa1ZeR_.DiverseCart.DiverseCart;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -12,11 +13,31 @@ import java.util.List;
 public class StorageManager {
 
     private Connection connection;
+    private FileConfiguration config;
+
+    private String tableName;
+    private String username;
+    private String title;
+    private String iid;
+    private String extra;
+    private String type;
+    private String amount;
+    private String serverId;
 
     public StorageManager() {
         try {
+            config = DiverseCart.instance.getCfg();
             connection = DiverseCart.instance.getMySQL().getConection();
             prepareDB();
+
+            tableName = config.getString("cart-table.table-name");
+            username = config.getString("cart-table.username");
+            title = config.getString("cart-table.title");
+            iid = config.getString("cart-table.iid");
+            extra = config.getString("cart-table.extra");
+            type = config.getString("cart-table.type");
+            amount = config.getString("cart-table.amount");
+            serverId = config.getString("cart-table.server-id");
         } catch (SQLException e) {
             DiverseCart.instance.getServer().shutdown();
             DiverseCart.instance.getDebug().error("Can't connect to MySQL: \n" + e);
@@ -26,7 +47,9 @@ public class StorageManager {
     private void prepareDB() {
         try {
             Statement statement = connection.createStatement();
-            statement.execute("CREATE TABLE IF NOT EXISTS diverse_cart (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT, `server` VARCHAR(32) NOT NULL, `type` VARCHAR(24) NOT NULL, `username` VARCHAR(24) NOT NULL, `iid` TEXT NOT NULL, `amount` TINYINT UNSIGNED NOT NULL, `enchantments` TEXT, `extra` TEXT, PRIMARY KEY (`id`))");
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, " + username + " VARCHAR(24) NOT NULL, "
+                    + title + " VARCHAR(128) NOT NULL, " + iid + " VARCHAR(128) NOT NULL, " + extra + " TEXT NOT NULL, " +  type + "VARCHAR(24) DEFAULT 'item', " + amount + " SMALLINT(3) NOT NULL, " + serverId + " int(11) NOT NULL);" +
+                    "ALTER TABLE " + tableName + " ADD PRIMARY KEY (`id`);");
         } catch (SQLException e) {
             DiverseCart.instance.getDebug().error("Can't prepare DB: \n" + e);
         }
