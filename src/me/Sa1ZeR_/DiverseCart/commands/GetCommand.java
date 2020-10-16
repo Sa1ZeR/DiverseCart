@@ -13,9 +13,9 @@ public class GetCommand extends AbstractPlayerCommand {
 
     @Override
     protected void perform(Player player, String[] args) {
-        int id;
+        long id;
         try {
-            id = Integer.parseInt(args[1]);
+            id = Long.parseLong(args[1]);
             DiverseCart.instance.getStorageManager().getItem(id, player);
         } catch (IllegalFormatException e) {
             DiverseCart.instance.getMessageManager().sendPlayer("commands.get.bad-format", player, new String[0]);

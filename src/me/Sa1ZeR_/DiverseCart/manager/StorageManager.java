@@ -112,14 +112,14 @@ public class StorageManager {
         return map;
     }
 
-    public void getItem(int id, Player player) {
+    public void getItem(long id, Player player) {
         DiverseCart.instance.getMySQL().getExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 PreparedStatement ps = null;
                 try {
                     ps = connection.prepareStatement("SELECT * FROM " + tableName + " WHERE id=? AND " + serverId + "=? AND " + username + "=?");
-                    ps.setInt(1, id);
+                    ps.setLong(1, id);
                     ps.setInt(2, DiverseCart.instance.getCfg().getInt("server-id"));
                     ps.setString(3, player.getName());
                     ResultSet rs = ps.executeQuery();
@@ -212,14 +212,14 @@ public class StorageManager {
         });
     }
 
-    private void clearItems(int id) {
+    private void clearItems(long id) {
         DiverseCart.instance.getMySQL().getExecutor().submit(new Runnable() {
             @Override
             public void run() {
                 PreparedStatement ps = null;
                 try {
                     ps = connection.prepareStatement("DELETE FROM " + tableName + " WHERE id=? AND " + serverId + "=?");
-                    ps.setInt(1, id);
+                    ps.setLong(1, id);
                     ps.setString(2, DiverseCart.instance.getCfg().getString("server-id"));
                     ps.execute();
                 } catch (SQLException e) {
