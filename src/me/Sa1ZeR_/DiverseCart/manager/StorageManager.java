@@ -47,11 +47,11 @@ public class StorageManager {
     private void prepareDB() {
         try {
             Statement statement = connection.createStatement();
-            statement.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, " + username + " VARCHAR(24) NOT NULL, "
+            statement.execute("CREATE TABLE IF NOT EXISTS " + tableName + " (`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT, `"+ username + "` VARCHAR(24) NOT NULL, "
                     + title + " VARCHAR(128) NOT NULL, " + iid + " VARCHAR(128) NOT NULL, " + extra + " TEXT NOT NULL, " +  type + "VARCHAR(24) DEFAULT 'item', " + amount + " SMALLINT(3) NOT NULL, " + serverId + " int(11) NOT NULL);" +
-                    "ALTER TABLE " + tableName + " ADD PRIMARY KEY (`id`);");
+                    "ALTER TABLE " + tableName + " ADD PRIMARY KEY (`id`);" + "ALTER TABLE + "+ tableName + " MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;");
         } catch (SQLException e) {
-            DiverseCart.instance.getDebug().error("Can't prepare DB: \n" + e);
+            //DiverseCart.instance.getDebug().error("Can't prepare DB: \n" + e);
         }
     }
 

@@ -2,6 +2,7 @@ package me.Sa1ZeR_.DiverseCart.manager;
 
 import me.Sa1ZeR_.DiverseCart.CartType;
 import me.Sa1ZeR_.DiverseCart.DiverseCart;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -24,6 +25,9 @@ public class CartManager {
 
     public void performCartItem(CartType type, String iid, int amount, String extra, Player player) {
         if(type == CartType.ITEM) {
+            if(!iid.contains(":")) {
+                iid = iid + ":0";
+            }
             String[] arrID = iid.split(":");
             ItemStack itemStack;
             try {
@@ -31,7 +35,7 @@ public class CartManager {
             } catch (Exception ex) {
                 itemStack = new ItemStack(Material.getMaterial(Integer.parseInt(arrID[0])), amount, (short) Integer.parseInt(arrID[1]));
             }
-            if(extra != null) {
+            if(!StringUtils.isEmpty(extra)) {
                 itemStack = DiverseCart.instance.getNbtManager().createItem(itemStack, extra);
             }
             if(!isFullInventory(player)) {
